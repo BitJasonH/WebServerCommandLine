@@ -6,17 +6,14 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
-/**
- * Created by morri on 17/4/17.
- */
 public class Server {
     private ServerSocket serverSocket;
     private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
     private int port;
+    private String rootDir;
 
     /**
      * Constructor for initializing a Server
@@ -29,8 +26,6 @@ public class Server {
 
         try {
             serverSocket = new ServerSocket(port, 1, InetAddress.getByAddress(ip));
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,11 +48,22 @@ public class Server {
      * @param port listening port
      * @return a new server listening 127.0.0.1:port
      */
-    public static Server getDefaultServer(int port) {
+    static Server getDefaultServer(int port) {
         return new Server(port, new byte[]{127, 0, 0, 1});
     }
 
-    public void start() {
+    public String getRootDir() {
+        return rootDir;
+    }
+
+    public void setRootDir(String rootDir) {
+        this.rootDir = rootDir;
+    }
+
+    /**
+     * Make the server start to receive request and send response
+     */
+    void start() {
         while (true) {
             try {
                 socket = serverSocket.accept();
@@ -65,9 +71,12 @@ public class Server {
                 outputStream = socket.getOutputStream();
             } catch (IOException e) {
                 e.printStackTrace();
+                continue;
             }
-
-
+            Request newRequest = Request.getNewRequestContainer(inputStream);
+            newRequest.setWorkingDir(rootDir);
+            Thread newThread = new Thread(newRequest);
+            newThread.start();
         }
     }
 }
