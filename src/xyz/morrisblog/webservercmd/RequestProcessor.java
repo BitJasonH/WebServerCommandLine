@@ -61,9 +61,11 @@ public class RequestProcessor implements Runnable {
             request.append((char) buffer[i]);
         }
 
+        System.out.println(request);
+
         parseUri();
 
-        System.out.println(uri == null ? "" : uri);
+//        System.out.println(uri == null ? "" : uri);
         sendResponse();
     }
 
