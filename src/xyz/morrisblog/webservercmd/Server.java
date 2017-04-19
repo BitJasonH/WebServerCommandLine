@@ -52,10 +52,6 @@ public class Server {
         return new Server(port, new byte[]{127, 0, 0, 1});
     }
 
-    public String getRootDir() {
-        return rootDir;
-    }
-
     public void setRootDir(String rootDir) {
         this.rootDir = rootDir;
     }
@@ -73,9 +69,11 @@ public class Server {
                 e.printStackTrace();
                 continue;
             }
-            Request newRequest = Request.getNewRequestContainer(inputStream);
-            newRequest.setWorkingDir(rootDir);
-            Thread newThread = new Thread(newRequest);
+            RequestProcessor newRequestProcessor = RequestProcessor.getNewRequestContainer();
+            newRequestProcessor.setRequestStream(inputStream);
+            newRequestProcessor.setResponseStream(outputStream);
+            newRequestProcessor.setWorkingDir(rootDir);
+            Thread newThread = new Thread(newRequestProcessor);
             newThread.start();
         }
     }
